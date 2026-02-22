@@ -26,7 +26,7 @@ export default function CardSwipeSection() {
   })
 
   return (
-    <section className="relative bg-bg">
+    <section className="relative bg-bg section-shadow">
       {/* Inject CSS untuk show/hide dua layout berdasarkan 1025px threshold */}
       <style>{`
         .css-static  { display: block; }

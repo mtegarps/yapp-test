@@ -5,7 +5,7 @@ import RandomizedTextEffect from '@/app/components/effects/RandomizedTextEffect'
 
 export default function DontMissOutSection() {
   return (
-    <section className="relative bg-bg border-t border-b border-border">
+    <section className="relative bg-bg border-t border-b border-border section-shadow">
       {/* 5-column grid lines background — hide di mobile biar gak menuh-menuhin */}
       <div className="absolute inset-0 hidden md:grid grid-cols-5 pointer-events-none">
         <div className="border-r border-border" />

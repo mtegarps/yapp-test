@@ -6,7 +6,7 @@ import AbstractCanvas from '@/app/components/sections/AbstractCanvas'
 
 export default function FooterSection() {
   return (
-    <footer className="relative bg-[#171616]">
+    <footer className="relative bg-[#171616] section-shadow">
       <div className="relative mx-auto max-w-[1440px]">
         {/* Main area — CTA + Crosshair + Title */}
         <div

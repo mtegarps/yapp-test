@@ -60,7 +60,7 @@ export default function ExpandingTextSection() {
   return (
     <section className="relative z-20 bg-bg-surface2">
       <div ref={containerRef} className="h-[200vh] md:h-[300vh] relative">
-        <div className="sticky top-[100px] md:top-[130px] h-[calc(100vh-100px)] md:h-[calc(100vh-130px)] overflow-hidden flex flex-col justify-center">
+        <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center bg-bg-surface2 z-20 pt-[100px] md:pt-[130px]">
           <Image
             src="/star_left_decor.svg"
             alt="Star Decor"

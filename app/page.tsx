@@ -83,11 +83,6 @@ const BackgroundParticles = dynamic(
   { ssr: false }
 )
 
-const SectionReveal = dynamic(
-  () => import('@/app/components/ui/SectionReveal'),
-  { ssr: false }
-)
-
 // Stagger variants buat hero entrance
 const heroStagger = {
   hidden: { opacity: 0 },
@@ -231,8 +226,7 @@ export default function Home() {
             </div>
 
             {/* Future NFT Marketplace section */}
-            <SectionReveal>
-              <section className="relative bg-bg">
+            <section className="relative bg-bg">
                 <div className="hidden lg:grid grid-cols-6 absolute inset-0">
                   <div className="h-full border-r border-border" />
                   <div className="h-full border-r border-border col-span-2" />
@@ -303,7 +297,6 @@ export default function Home() {
                   </div>
                 </div>
               </section>
-            </SectionReveal>
 
             <HorizontalScrollSection />
 
@@ -326,16 +319,12 @@ export default function Home() {
 
             <CardSwipeSection />
 
-            <SectionReveal direction="left">
-              <DontMissOutSection />
-            </SectionReveal>
+            <DontMissOutSection />
 
             <RaffleCarousel />
             <DarkSpacer />
 
-            <SectionReveal direction="up" delay={0.1}>
-              <FooterSection />
-            </SectionReveal>
+            <FooterSection />
 
             <Taglines />
           </section>

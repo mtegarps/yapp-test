@@ -16,7 +16,7 @@ export default function HorizontalScrollSection() {
   const x = useTransform(scrollYProgress, [0, 1], ['0%', '-50%'])
 
   return (
-    <section ref={targetRef} className="relative lg:h-[300vh] h-auto bg-bg border-b border-border">
+    <section ref={targetRef} className="relative lg:h-[300vh] h-auto bg-bg border-b border-border section-shadow">
       {/* Background grid lines */}
       <div className="absolute inset-0 grid grid-cols-6 pointer-events-none">
         <div className="border-border h-full border-r" />

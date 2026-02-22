@@ -177,14 +177,9 @@ body {
   text-rendering: optimizeSpeed;
 }
 
-/* GPU-accelerated layers for fixed/sticky elements */
-.fixed, .sticky {
+/* GPU-accelerated layers for fixed elements */
+.fixed {
   will-change: transform;
-}
-
-/* Content containment for heavy sections */
-section {
-  contain: layout style;
 }
 
 /* Optimize canvas rendering */

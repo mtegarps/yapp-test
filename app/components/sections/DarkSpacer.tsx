@@ -196,7 +196,7 @@ export default function DarkSpacer() {
   }, [])
 
   return (
-    <section className="relative bg-black h-[250px] lg:h-[350px] border-t border-border overflow-hidden">
+    <section className="relative bg-black h-[250px] lg:h-[350px] border-t border-border overflow-hidden section-shadow">
       {/* Layer 1: Three.js wave grid */}
       <canvas
         ref={canvasRef}
