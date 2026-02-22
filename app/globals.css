@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+:root {
+  /* Background colors */
+  --bg: #0B0B0B;
+  --bg-surface: #201F1F;
+  --bg-surface2: #171616;
+  --bg-dark: #000000;
+  
+  /* Primary/Orange colors */
+  --primary: #FF7300;
+  --primary-light: #FFF2D3;
+  --primary-fill: #FFD6B5;
+  --primary-dark: #A1400C;
+  --primary-darker: #471903;
+  
+  /* Border color */
+  --border: #484848;
+  
+  /* Text/Foreground colors */
+  --foreground: var(--primary-light);
+  --foreground-muted: #878787;
+  --foreground-subtle: #666666;
+  
+  /* Accent colors */
+  --accent-blue: #3B82F6;
+  --accent-purple: #A855F7;
+  --accent-pink: #EC4899;
+  --accent-green: #10B981;
+
+  /* Animation */
+  --duration: 20s;
+  --gap: 1rem; /* spacing between repeating marquee items */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface2: var(--bg-surface2);
+  --color-bg-dark: var(--bg-dark);
+  
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-fill: var(--primary-fill);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-darker: var(--primary-darker);
+  
+  --color-border: var(--border);
+  
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-green: var(--accent-green);
+  
+  --font-sans: var(--font-kode-mono), ui-monospace, 'Courier New', monospace;
+  --font-mono: var(--font-kode-mono), ui-monospace, 'Courier New', monospace;
+}
+
+/* Optional: Dark mode overrides (if needed) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Already dark by default, but you can adjust if needed */
+  }
+}
+
+@layer utilities {
+  @keyframes marquee {
+    0% { transform: translate(0); }
+    100% { transform: translateX(calc(-100% - var(--gap))); }
+  }
+
+  .animate-marquee {
+      animation: marquee var(--duration) infinite linear;
+  }
+
+  @keyframes roll {
+    0% {
+      transform: translateY(20px);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateY(-10px);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(0px);
+      opacity: 1;
+    }
+  }
+  
+  .animate-roll {
+    animation: roll 0.2s ease-out;
+  }  
+  
+  .\[animation-direction\:reverse\] {
+      animation-direction: reverse;
+  }
+
+  /* Scanning border — garis yang jalan sepanjang edge button */
+  @keyframes scan-x {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes scan-x-reverse {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+  .animate-scan-x {
+    animation: scan-x 2s ease-in-out infinite;
+  }
+  .animate-scan-x-reverse {
+    animation: scan-x-reverse 2s ease-in-out infinite;
+  }
+
+  /* Neon text flicker */
+  @keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      text-shadow: 
+        0 0 4px rgba(255, 115, 0, 0.4),
+        0 0 11px rgba(255, 115, 0, 0.2),
+        0 0 19px rgba(255, 115, 0, 0.1);
+    }
+    20%, 24%, 55% {
+      text-shadow: none;
+    }
+  }
+  .animate-neon-flicker {
+    animation: neon-flicker 4s ease-in-out infinite;
+  }
+
+  /* Pulse glow buat border */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0px rgba(255, 115, 0, 0);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(255, 115, 0, 0.15), 0 0 30px rgba(255, 115, 0, 0.05);
+    }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Grid line draw animation */
+  @keyframes draw-line {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+  .animate-draw-line {
+    animation: draw-line 1s ease-out forwards;
+    transform-origin: top;
+  }
+}
+
+/* Reduced motion — matiin semua animasi kalo user prefer reduced */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .motion-reduce\:hidden {
+    display: none !important;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--foreground);
+  font-family: var(--font-kode-mono), Arial, Helvetica, sans-serif;
+  cursor: none;
+}
+
+/* Restore cursor di mobile */
+@media (hover: none) and (pointer: coarse) {
+  body { cursor: auto; }
+}
