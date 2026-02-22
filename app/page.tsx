@@ -15,7 +15,7 @@ import { ProductAltCard, ProductGrid } from '@/app/components/cards'
 import { RandomizedTextEffect, CharacterFadeEffect } from '@/app/components/effects'
 
 // Data & Utils
-import { PRODUCTS } from '@/app/data'
+import { PRODUCTS, TAGLINES } from '@/app/data'
 import { createArray } from '@/app/lib/utils'
 
 // ═══ HEAVY COMPONENTS — dynamic imports with code splitting ═══
@@ -130,7 +130,15 @@ export default function Home() {
 
           {/* Hero section — fixed di belakang */}
           <header className="fixed top-0 left-0 w-full h-full bg-bg-surface2 pt-[60px]">
-            <Taglines />
+            <section className="w-full bg-bg-surface2 overflow-hidden border-b border-border py-3.5 [--gap:50px] md:[--gap:200px] lg:[--gap:200px] xl:[--gap:200px] isolate" style={{ clipPath: 'inset(0)' }}>
+              <Marquee baseVelocity={1.5} gap="var(--gap)">
+                {TAGLINES.map((tagline: string) => (
+                  <p key={tagline} className="text-center text-[10px] text-foreground-muted whitespace-nowrap">
+                    {tagline}
+                  </p>
+                ))}
+              </Marquee>
+            </section>
             <section className="w-full px-0 md:px-40">
               {/* Hero content dengan stagger entrance */}
               <motion.section
