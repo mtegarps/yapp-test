@@ -82,12 +82,12 @@ export default function FooterSection() {
             <p className="text-foreground-muted text-[11px] font-medium mt-0.5 uppercase tracking-wide">ALL RIGHT RESERVED</p>
           </div>
           <div className="flex items-center justify-center px-4 md:px-8 py-3 md:py-0 border-b md:border-b-0 md:border-r border-[#484848]">
-            <p className="text-foreground-muted text-[11px] font-medium text-center uppercase tracking-wide leading-relaxed">
+            <p className="text-foreground text-[11px] font-bold uppercase tracking-wider">
               // STOP WAITING MONTHS ON<br />TRADITIONAL MARKETPLACES
             </p>
           </div>
           <div className="flex flex-col items-start md:items-end justify-center px-4 md:px-8 py-3 md:py-0">
-            <p className="text-foreground text-[11px] font-bold uppercase tracking-wider">CONTACT</p>
+            <p className="text-foreground-muted text-[11px] font-medium mt-0.5">CONTACT</p>
             <p className="text-foreground-muted text-[11px] font-medium mt-0.5">hi@raflux.io</p>
           </div>
         </div>

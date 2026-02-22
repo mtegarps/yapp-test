@@ -86,7 +86,7 @@ export default function NavBar() {
           >
             {/* Sweep effect on hover */}
             <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-out" />
-            <span className="relative">LAUNCH APP</span>
+            <span className="relative">GET STARTED</span>
           </Link>
         </motion.div>
       </div>

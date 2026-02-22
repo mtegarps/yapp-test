@@ -60,7 +60,7 @@ export const DUMMY_RAFFLES: RaffleItem[] = Array.from({ length: 8 }).map((_, i) 
   id: String(i + 1),
   image: '/products/pudgy.svg',
   name: 'Pudgy Penguins #7105',
-  saleEnded: '21 June 2025',
+  saleEnded: '29 Feb 2026',
   ticketPrice: 5,
   countdown: { days: 13, hours: 2, minutes: 4, seconds: 24 },
 }))
