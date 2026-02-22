@@ -19,13 +19,18 @@ export default function SmoothScrolling() {
       touchMultiplier: 2,
     })
 
+    let rafId: number
+
     function raf(time: number) {
       lenis.raf(time)
-      requestAnimationFrame(raf)
+      rafId = requestAnimationFrame(raf)
     }
 
-    requestAnimationFrame(raf)
-    return () => lenis.destroy()
+    rafId = requestAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(rafId)
+      lenis.destroy()
+    }
   }, [])
 
   return null

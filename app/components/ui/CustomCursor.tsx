@@ -41,7 +41,7 @@ export default function CustomCursor() {
 
     // Spawn trail particle setiap ~60px movement
     const newTrail = { x: e.clientX, y: e.clientY, id: trailIdRef.current++ }
-    trailRef.current = [...trailRef.current.slice(-6), newTrail]
+    trailRef.current = [...trailRef.current.slice(-3), newTrail]
     setTrails([...trailRef.current])
   }, [mouseX, mouseY])
 
@@ -83,7 +83,7 @@ export default function CustomCursor() {
   // Cleanup trails setiap 500ms
   useEffect(() => {
     const cleanup = setInterval(() => {
-      trailRef.current = trailRef.current.slice(-3)
+      trailRef.current = trailRef.current.slice(-2)
       setTrails([...trailRef.current])
     }, 500)
     return () => clearInterval(cleanup)

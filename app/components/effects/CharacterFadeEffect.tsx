@@ -39,28 +39,34 @@ const CharacterFadeEffect: React.FC<CharacterFadeEffectProps> = ({
   }
 
   const childVariants = {
-    hidden: { opacity: 0, filter: 'blur(4px)', y: 5 },
+    hidden: { opacity: 0, y: 5 },
     visible: {
       opacity: 1,
-      filter: 'blur(0px)',
       y: 0,
       transition: { duration: 0.4, ease: 'easeOut' as const },
     },
   }
 
+  // Optimize: animate per-word instead of per-character to reduce DOM nodes
   const renderAnimatedChildren = (node: React.ReactNode): React.ReactNode => {
     return React.Children.map(node, child => {
       if (typeof child === 'string') {
-        return child.split('').map((char, index) => (
-          <motion.span
-            key={index}
-            variants={childVariants}
-            className="inline-block"
-            style={{ whiteSpace: char === ' ' ? 'pre' : 'normal' }}
-          >
-            {char}
-          </motion.span>
-        ))
+        // Split by spaces, animate each word
+        const words = child.split(/(\s+)/)
+        return words.map((word, index) => {
+          if (word.match(/^\s+$/)) {
+            return <span key={`space-${index}`} style={{ whiteSpace: 'pre' }}>{word}</span>
+          }
+          return (
+            <motion.span
+              key={index}
+              variants={childVariants}
+              className="inline-block"
+            >
+              {word}
+            </motion.span>
+          )
+        })
       }
       if (React.isValidElement(child)) {
         const element = child as React.ReactElement<Record<string, unknown>>

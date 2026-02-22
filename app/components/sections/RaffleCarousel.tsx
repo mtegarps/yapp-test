@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, memo } from 'react'
 import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion'
 import Image from 'next/image'
 import { useCountdown } from '@/app/hooks/useCountdown'
@@ -87,7 +87,7 @@ export default function RaffleCarousel() {
   )
 }
 
-function RaffleCard({ item }: { item: RaffleItem }) {
+const RaffleCard = memo(function RaffleCard({ item }: { item: RaffleItem }) {
   const time = useCountdown(item.countdown)
 
   return (
@@ -134,7 +134,7 @@ function RaffleCard({ item }: { item: RaffleItem }) {
       </div>
     </div>
   )
-}
+})
 
 function NavButton({ direction, onClick }: { direction: 'left' | 'right'; onClick: () => void }) {
   const path = direction === 'left' ? 'M11 5L7 9L11 13' : 'M7 5L11 9L7 13'

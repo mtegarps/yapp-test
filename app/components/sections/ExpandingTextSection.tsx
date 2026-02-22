@@ -66,6 +66,7 @@ export default function ExpandingTextSection() {
             alt="Star Decor"
             width={200}
             height={200}
+            loading="lazy"
             className="absolute bottom-0 left-0 hidden md:block w-[120px] lg:w-[200px] h-auto"
           />
           <Image
@@ -73,6 +74,7 @@ export default function ExpandingTextSection() {
             alt="Star Decor"
             width={200}
             height={200}
+            loading="lazy"
             className="absolute top-0 right-0 hidden md:block w-[120px] lg:w-[200px] h-auto"
           />
 

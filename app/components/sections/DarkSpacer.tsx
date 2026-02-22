@@ -12,8 +12,8 @@ export default function DarkSpacer() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'low-power' })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.setClearColor(0x000000, 1)
 
     const scene  = new THREE.Scene()
@@ -21,7 +21,7 @@ export default function DarkSpacer() {
     camera.position.set(0, 4, 10)
     camera.lookAt(0, 0, 0)
 
-    const COLS = 80, ROWS = 30, SPACING = 0.38
+    const COLS = 60, ROWS = 20, SPACING = 0.5
     const count     = COLS * ROWS
     const positions = new Float32Array(count * 3)
     const baseX     = new Float32Array(count)

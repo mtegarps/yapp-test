@@ -1,41 +1,92 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
-// Layout
+// Layout - lightweight, load immediately
 import { NavBar, Taglines } from '@/app/components/layout'
 
-// Cards
+// Cards - lightweight, load immediately
 import { ProductAltCard, ProductGrid } from '@/app/components/cards'
 
-// Effects
+// Effects - lightweight, load immediately
 import { RandomizedTextEffect, CharacterFadeEffect } from '@/app/components/effects'
-
-// Sections
-import {
-  LoadingScreen,
-  ExpandingTextSection,
-  HorizontalScrollSection,
-  CardSwipeSection,
-  DontMissOutSection,
-  RaffleCarousel,
-  DarkSpacer,
-  FooterSection,
-} from '@/app/components/sections'
-
-// UI
-import Marquee from '@/app/components/ui/Marquee'
-import CustomCursor from '@/app/components/ui/CustomCursor'
-import BackgroundParticles from '@/app/components/ui/BackgroundParticles'
-import SectionReveal from '@/app/components/ui/SectionReveal'
-import HeroShaderCanvas from '@/app/components/ui/HeroShaderCanvas'
 
 // Data & Utils
 import { PRODUCTS } from '@/app/data'
 import { createArray } from '@/app/lib/utils'
+
+// ═══ HEAVY COMPONENTS — dynamic imports with code splitting ═══
+
+// Three.js heavy components - only load when needed
+const LoadingScreen = dynamic(
+  () => import('@/app/components/sections/LoadingScreen'),
+  { ssr: false }
+)
+
+const HeroShaderCanvas = dynamic(
+  () => import('@/app/components/ui/HeroShaderCanvas'),
+  { ssr: false, loading: () => <div className="w-full h-full bg-bg-surface" /> }
+)
+
+// Sections below the fold - lazy load
+const ExpandingTextSection = dynamic(
+  () => import('@/app/components/sections/ExpandingTextSection'),
+  { ssr: false }
+)
+
+const HorizontalScrollSection = dynamic(
+  () => import('@/app/components/sections/HorizontalScrollSection'),
+  { ssr: false }
+)
+
+const CardSwipeSection = dynamic(
+  () => import('@/app/components/sections/CardSwipeSection'),
+  { ssr: false }
+)
+
+const DontMissOutSection = dynamic(
+  () => import('@/app/components/sections/DontMissOutSection'),
+  { ssr: false }
+)
+
+const RaffleCarousel = dynamic(
+  () => import('@/app/components/sections/RaffleCarousel'),
+  { ssr: false }
+)
+
+const DarkSpacer = dynamic(
+  () => import('@/app/components/sections/DarkSpacer'),
+  { ssr: false }
+)
+
+const FooterSection = dynamic(
+  () => import('@/app/components/sections/FooterSection'),
+  { ssr: false }
+)
+
+// UI components with heavy deps
+const Marquee = dynamic(
+  () => import('@/app/components/ui/Marquee'),
+  { ssr: false }
+)
+
+const CustomCursor = dynamic(
+  () => import('@/app/components/ui/CustomCursor'),
+  { ssr: false }
+)
+
+const BackgroundParticles = dynamic(
+  () => import('@/app/components/ui/BackgroundParticles'),
+  { ssr: false }
+)
+
+const SectionReveal = dynamic(
+  () => import('@/app/components/ui/SectionReveal'),
+  { ssr: false }
+)
 
 // Stagger variants buat hero entrance
 const heroStagger = {
@@ -69,10 +120,14 @@ const heroChildRight = {
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
+  const handleLoadingFinished = useCallback(() => {
+    setIsLoading(false)
+  }, [])
+
   return (
     <main className="pt-[95vh] min-h-screen">
       <CustomCursor />
-      <LoadingScreen onFinished={() => setIsLoading(false)} />
+      <LoadingScreen onFinished={handleLoadingFinished} />
       {!isLoading && (
         <>
           <BackgroundParticles />
@@ -255,7 +310,7 @@ export default function Home() {
             <section className="bg-bg h-[280px] flex items-center justify-center border-b border-border [--gap:50px] md:[--gap:200px] lg:[--gap:200px] xl:[--gap:200px]">
               <div className="w-full transform-none">
                 <Marquee baseVelocity={0.5} gap="var(--gap)" className="group flex overflow-hidden flex-row p-0">
-                  {createArray(20).map(index => (
+                  {createArray(8).map(index => (
                     <div key={index} className="lg:max-w-[695px] max-w-[380px] w-full max-lg:space-y-4 h-fit relative">
                       <p className="lg:absolute top-4 right-4 lg:max-w-[143px] text-foreground-muted lg:text-right text-sm">
                         // EVM COMPATIBLE(BASE)

@@ -20,9 +20,9 @@ export default function AbstractCanvas({ className = '' }: { className?: string 
     const width = container.clientWidth
     const height = container.clientHeight
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'low-power' })
     renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     container.appendChild(renderer.domElement)
     renderer.domElement.style.display = 'block'
 

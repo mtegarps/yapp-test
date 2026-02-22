@@ -2,39 +2,107 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as THREE from 'three'
-import { createNoise } from '@/app/lib/noise'
 
 /**
- * Loading screen dengan sphere 3D yang morph organic.
- * Sphere-nya makin gede dan makin distort seiring progress naik.
- * Ada juga orbiting ring, floating particles, dan scanline overlay
- * biar vibes-nya futuristik.
+ * Loading screen — Canvas 2D only, zero Three.js.
+ *
+ * Visual elements (all drawn on a single 2D canvas):
+ *   1. Morphing blob orb — simplex noise displacement on a radial shape
+ *   2. Inner glow core — pulsating orange/amber gradient
+ *   3. Wireframe icosahedron shell — rotating line-drawn polyhedron
+ *   4. Orbiting rings — elliptical arcs that spin
+ *   5. Floating particles — orbit + drift outward on explode
+ *   6. Scanline + vignette overlays (CSS, same as before)
+ *   7. Explode state — orb shatters into particles, flash, fade
+ *
+ * Palette: #0a0a0a bg, #FF6A00 primary, #00b4ff accent, #FF3D00 hot
  */
+
+// ─── Simplex-ish 2D noise (compact) ──────────────────────────────────────────
+const GRAD = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]]
+const P = Array.from({length:256},(_,i)=>i).sort(()=>Math.random()-0.5)
+const PERM = [...P,...P]
+const dot2 = (g:number[],x:number,y:number) => g[0]*x+g[1]*y
+function noise2D(x:number,y:number){
+  const F2=0.5*(Math.sqrt(3)-1),G2=(3-Math.sqrt(3))/6
+  const s=(x+y)*F2,i=Math.floor(x+s),j=Math.floor(y+s)
+  const t=(i+j)*G2,x0=x-(i-t),y0=y-(j-t)
+  const i1=x0>y0?1:0,j1=x0>y0?0:1
+  const x1=x0-i1+G2,y1=y0-j1+G2,x2=x0-1+2*G2,y2=y0-1+2*G2
+  const ii=i&255,jj=j&255
+  const gi0=PERM[ii+PERM[jj]]%8,gi1=PERM[ii+i1+PERM[jj+j1]]%8,gi2=PERM[ii+1+PERM[jj+1]]%8
+  let n0=0,n1=0,n2=0,t0=0.5-x0*x0-y0*y0,t1=0.5-x1*x1-y1*y1,t2=0.5-x2*x2-y2*y2
+  if(t0>=0){t0*=t0;n0=t0*t0*dot2(GRAD[gi0],x0,y0)}
+  if(t1>=0){t1*=t1;n1=t1*t1*dot2(GRAD[gi1],x1,y1)}
+  if(t2>=0){t2*=t2;n2=t2*t2*dot2(GRAD[gi2],x2,y2)}
+  return 70*(n0+n1+n2)
+}
+
+// ─── Particle type ───────────────────────────────────────────────────────────
+interface Particle {
+  angle: number
+  radius: number
+  speed: number
+  size: number
+  opacity: number
+  vr: number // radial velocity for explode
+}
+
+// ─── Icosahedron wireframe data (projected to 2D) ────────────────────────────
+function createIcoVertices() {
+  const t = (1 + Math.sqrt(5)) / 2
+  const raw = [
+    [-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],
+    [0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],
+    [t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1],
+  ]
+  // Normalize to unit sphere
+  return raw.map(([x,y,z]) => {
+    const l = Math.sqrt(x*x+y*y+z*z)
+    return [x/l, y/l, z/l] as [number,number,number]
+  })
+}
+
+const ICO_EDGES = [
+  [0,1],[0,5],[0,7],[0,10],[0,11],[1,5],[1,7],[1,8],[1,9],
+  [2,3],[2,4],[2,6],[2,10],[2,11],[3,4],[3,6],[3,8],[3,9],
+  [4,5],[4,9],[4,11],[5,9],[5,11],[6,7],[6,8],[6,10],
+  [7,8],[7,10],[8,9],[9,5],[10,11],
+]
+
+function rotateY(v:[number,number,number], a:number): [number,number,number] {
+  const c=Math.cos(a),s=Math.sin(a)
+  return [v[0]*c+v[2]*s, v[1], -v[0]*s+v[2]*c]
+}
+function rotateX(v:[number,number,number], a:number): [number,number,number] {
+  const c=Math.cos(a),s=Math.sin(a)
+  return [v[0], v[1]*c-v[2]*s, v[1]*s+v[2]*c]
+}
+
 const LoadingScreen = ({ onFinished }: { onFinished?: () => void }) => {
   const [progress, setProgress] = useState(0)
   const [isVisible, setIsVisible] = useState(true)
   const [isExploding, setIsExploding] = useState(false)
-  const mountRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const progressRef = useRef(0)
   const animRef = useRef<number>(0)
   const explodeRef = useRef(false)
+  const explodeTimeRef = useRef(0)
 
   useEffect(() => { progressRef.current = progress }, [progress])
   useEffect(() => { explodeRef.current = isExploding }, [isExploding])
 
-  // Progress counter — speed-nya variable biar ada feel "loading"
+  // Progress counter — speed variable biar ada feel "loading"
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval)
-          // Trigger explode dulu sebelum fade out
           setIsExploding(true)
           setTimeout(() => {
             setIsVisible(false)
             onFinished?.()
-          }, 1200) // Kasih waktu buat explode animation
+          }, 1200)
           return 100
         }
         const remaining = 100 - prev
@@ -45,248 +113,262 @@ const LoadingScreen = ({ onFinished }: { onFinished?: () => void }) => {
     return () => clearInterval(interval)
   }, [onFinished])
 
-  const initScene = useCallback(() => {
-    const container = mountRef.current
-    if (!container) return
+  const initCanvas = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { alpha: false })
+    if (!ctx) return
 
-    const width = container.clientWidth
-    const height = container.clientHeight
-    const noise = createNoise()
+    let W = 0, H = 0
+    const dpr = Math.min(window.devicePixelRatio, 1.5)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
-    container.appendChild(renderer.domElement)
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100)
-    camera.position.set(0, 0, 5)
-
-    // Lighting setup
-    scene.add(new THREE.AmbientLight(0x222222, 1))
-    const mainLight = new THREE.PointLight(0xff6a00, 3, 20)
-    mainLight.position.set(3, 3, 4)
-    scene.add(mainLight)
-    const rimLight = new THREE.PointLight(0x00b4ff, 2, 15)
-    rimLight.position.set(-4, -2, 3)
-    scene.add(rimLight)
-    const topLight = new THREE.PointLight(0xff3d00, 1.5, 12)
-    topLight.position.set(0, 5, 2)
-    scene.add(topLight)
-
-    // Morphing blob sphere
-    const sphereGeo = new THREE.IcosahedronGeometry(1.2, 64)
-    const originalPositions = sphereGeo.attributes.position.array.slice() as Float32Array
-    const sphereMat = new THREE.MeshPhysicalMaterial({
-      color: 0x1a1a1a,
-      metalness: 0.85,
-      roughness: 0.15,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.08,
-      envMapIntensity: 1.5,
-      emissive: new THREE.Color(0xff6a00),
-      emissiveIntensity: 0.05,
-    })
-    const sphere = new THREE.Mesh(sphereGeo, sphereMat)
-    scene.add(sphere)
-
-    // Wireframe shell
-    const wireGeo = new THREE.IcosahedronGeometry(1.6, 2)
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xff6a00, wireframe: true, transparent: true, opacity: 0.08,
-    })
-    const wireShell = new THREE.Mesh(wireGeo, wireMat)
-    scene.add(wireShell)
-
-    // Orbiting rings
-    const ringGeo = new THREE.TorusGeometry(2.0, 0.008, 8, 128)
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6a00, transparent: true, opacity: 0.35 })
-    const ring = new THREE.Mesh(ringGeo, ringMat)
-    ring.rotation.x = Math.PI * 0.45
-    scene.add(ring)
-
-    const ring2Geo = new THREE.TorusGeometry(2.3, 0.005, 8, 128)
-    const ring2Mat = new THREE.MeshBasicMaterial({ color: 0x00b4ff, transparent: true, opacity: 0.15 })
-    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat)
-    ring2.rotation.x = Math.PI * 0.6
-    ring2.rotation.y = Math.PI * 0.3
-    scene.add(ring2)
-
-    // Floating particles
-    const particleCount = 200
-    const particleGeo = new THREE.BufferGeometry()
-    const particlePositions = new Float32Array(particleCount * 3)
-    const particleSizes = new Float32Array(particleCount)
-    for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
-      const r = 2.0 + Math.random() * 2.5
-      particlePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-      particlePositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
-      particlePositions[i * 3 + 2] = r * Math.cos(phi)
-      particleSizes[i] = Math.random() * 2 + 0.5
+    const resize = () => {
+      W = canvas.clientWidth
+      H = canvas.clientHeight
+      canvas.width = W * dpr
+      canvas.height = H * dpr
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
-    particleGeo.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1))
-    const particleMat = new THREE.PointsMaterial({
-      color: 0xff6a00, size: 0.02, transparent: true, opacity: 0.6,
-      blending: THREE.AdditiveBlending, depthWrite: false,
-    })
-    const particles = new THREE.Points(particleGeo, particleMat)
-    scene.add(particles)
+    resize()
+    window.addEventListener('resize', resize)
 
-    // Env map
-    const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128)
-    const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget)
-    scene.add(cubeCamera)
-    sphereMat.envMap = cubeRenderTarget.texture
+    // Particles
+    const particles: Particle[] = Array.from({ length: 80 }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      radius: 100 + Math.random() * 140,
+      speed: (Math.random() - 0.5) * 0.008,
+      size: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.5 + 0.1,
+      vr: 1.5 + Math.random() * 4,
+    }))
 
-    const clock = new THREE.Clock()
-    let envUpdated = false
-    let explodeStartTime = 0
-    // Store velocity per-vertex buat explosion
-    const velocities = new Float32Array(originalPositions.length)
-    for (let i = 0; i < velocities.length; i += 3) {
-      const ox = originalPositions[i], oy = originalPositions[i + 1], oz = originalPositions[i + 2]
-      const len = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1
-      // Arah explosion = dari center ke luar + sedikit random
-      velocities[i] = (ox / len) * (2 + Math.random() * 3)
-      velocities[i + 1] = (oy / len) * (2 + Math.random() * 3)
-      velocities[i + 2] = (oz / len) * (2 + Math.random() * 3)
-    }
+    // Icosahedron vertices
+    const icoVerts = createIcoVertices()
 
-    const animate = () => {
-      animRef.current = requestAnimationFrame(animate)
-      const t = clock.getElapsedTime()
+    // Blob shape cache — angles for the morphing orb
+    const BLOB_SEGMENTS = 120
+    const blobAngles = Array.from({ length: BLOB_SEGMENTS }, (_, i) =>
+      (i / BLOB_SEGMENTS) * Math.PI * 2
+    )
+
+    const startTime = performance.now()
+
+    const draw = (now: number) => {
+      animRef.current = requestAnimationFrame(draw)
+      const t = (now - startTime) / 1000
       const prog = progressRef.current / 100
       const isExplode = explodeRef.current
+      const cx = W / 2
+      const cy = H / 2
 
-      // Handle explosion state
-      if (isExplode && explodeStartTime === 0) {
-        explodeStartTime = t
-        // Switch ke wireframe buat dramatic effect
-        sphereMat.wireframe = true
-        sphereMat.opacity = 0.8
-        sphereMat.transparent = true
+      // Track explode time
+      if (isExplode && explodeTimeRef.current === 0) {
+        explodeTimeRef.current = t
+      }
+      const explodeElapsed = explodeTimeRef.current > 0 ? t - explodeTimeRef.current : 0
+      const explodeProg = Math.min(explodeElapsed / 1.0, 1)
+      const easeExplode = 1 - Math.pow(1 - explodeProg, 3)
+
+      // Clear
+      ctx.fillStyle = '#0a0a0a'
+      ctx.fillRect(0, 0, W, H)
+
+      // ── 1. Orbiting rings (behind orb) ─────────────────────────────────────
+      const drawRing = (
+        radiusX: number, radiusY: number,
+        tilt: number, rotSpeed: number,
+        color: string, alpha: number, lineW: number
+      ) => {
+        const a = alpha * (1 - explodeProg * 0.8)
+        if (a <= 0) return
+        ctx.save()
+        ctx.translate(cx, cy)
+        ctx.rotate(tilt + t * rotSpeed)
+        ctx.beginPath()
+        ctx.ellipse(0, 0, radiusX * (1 + explodeProg * 2), radiusY * (1 + explodeProg * 2), 0, 0, Math.PI * 2)
+        ctx.strokeStyle = color
+        ctx.globalAlpha = a
+        ctx.lineWidth = lineW
+        ctx.stroke()
+        ctx.globalAlpha = 1
+        ctx.restore()
       }
 
-      const explodeProgress = explodeStartTime > 0 ? Math.min((t - explodeStartTime) / 1.0, 1) : 0
+      const orbRadius = 70 + prog * 30
+      drawRing(orbRadius + 40, orbRadius * 0.35 + 15, 0.45, 0.2, '#FF6A00', 0.3, 1)
+      drawRing(orbRadius + 55, orbRadius * 0.3 + 20, 0.9, -0.15, '#00b4ff', 0.12, 0.7)
+      drawRing(orbRadius + 30, orbRadius * 0.25 + 10, -0.3, 0.25, '#FF3D00', 0.08, 0.5)
 
-      // Morph blob dengan noise displacement
-      const positions = sphereGeo.attributes.position.array as Float32Array
-      const noiseScale = 1.2 + prog * 0.8
-      const noiseAmp = 0.15 + prog * 0.35
-      const timeSpeed = t * 0.6
+      // ── 2. Wireframe icosahedron shell ─────────────────────────────────────
+      const shellAlpha = (0.04 + prog * 0.12) * (1 - explodeProg)
+      if (shellAlpha > 0.005) {
+        const shellRadius = orbRadius + 20 + explodeProg * 80
+        ctx.save()
+        ctx.globalAlpha = shellAlpha
+        ctx.strokeStyle = '#FF6A00'
+        ctx.lineWidth = 0.6
+        for (const [a, b] of ICO_EDGES) {
+          const va = rotateX(rotateY(icoVerts[a], t * 0.3), t * 0.2)
+          const vb = rotateX(rotateY(icoVerts[b], t * 0.3), t * 0.2)
+          // Simple perspective projection
+          const pza = 2.5 / (2.5 + va[2])
+          const pzb = 2.5 / (2.5 + vb[2])
+          ctx.beginPath()
+          ctx.moveTo(cx + va[0] * shellRadius * pza, cy + va[1] * shellRadius * pza)
+          ctx.lineTo(cx + vb[0] * shellRadius * pzb, cy + vb[1] * shellRadius * pzb)
+          ctx.stroke()
+        }
+        ctx.globalAlpha = 1
+        ctx.restore()
+      }
 
-      for (let i = 0; i < positions.length; i += 3) {
-        const ox = originalPositions[i]
-        const oy = originalPositions[i + 1]
-        const oz = originalPositions[i + 2]
-        const len = Math.sqrt(ox * ox + oy * oy + oz * oz)
-        const nx = ox / len, ny = oy / len, nz = oz / len
-        const n = noise(
-          nx * noiseScale + timeSpeed,
-          ny * noiseScale + timeSpeed * 0.7,
-          nz * noiseScale + timeSpeed * 0.5
+      // ── 3. Morphing blob orb ───────────────────────────────────────────────
+      if (explodeProg < 0.95) {
+        const noiseScale = 1.5 + prog * 1.0
+        const noiseAmp = 0.12 + prog * 0.25
+        const blobAlpha = 1 - explodeProg
+
+        // Inner glow
+        const glowR = orbRadius * (1.4 + explodeProg * 0.5)
+        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR)
+        glow.addColorStop(0, `rgba(255, 106, 0, ${0.15 * (0.6 + prog * 0.4) * blobAlpha})`)
+        glow.addColorStop(0.4, `rgba(255, 60, 0, ${0.06 * blobAlpha})`)
+        glow.addColorStop(1, 'rgba(255, 60, 0, 0)')
+        ctx.fillStyle = glow
+        ctx.fillRect(cx - glowR, cy - glowR, glowR * 2, glowR * 2)
+
+        // Draw morphing blob shape
+        ctx.save()
+        ctx.globalAlpha = blobAlpha
+        ctx.beginPath()
+        for (let i = 0; i <= BLOB_SEGMENTS; i++) {
+          const a = blobAngles[i % BLOB_SEGMENTS]
+          const nx = Math.cos(a) * noiseScale + t * 0.5
+          const ny = Math.sin(a) * noiseScale + t * 0.35
+          const n = noise2D(nx, ny)
+          const r = orbRadius * (1 + n * noiseAmp) * (1 + explodeProg * 0.3)
+          const px = cx + Math.cos(a) * r
+          const py = cy + Math.sin(a) * r
+          if (i === 0) ctx.moveTo(px, py)
+          else ctx.lineTo(px, py)
+        }
+        ctx.closePath()
+
+        // Gradient fill — dark metallic with orange highlights
+        const blobGrad = ctx.createRadialGradient(
+          cx - orbRadius * 0.3, cy - orbRadius * 0.3, 0,
+          cx, cy, orbRadius * 1.3
         )
-        const displacement = 1 + n * noiseAmp
+        blobGrad.addColorStop(0, '#2a2a2a')
+        blobGrad.addColorStop(0.5, '#1a1a1a')
+        blobGrad.addColorStop(0.8, '#111')
+        blobGrad.addColorStop(1, '#0a0a0a')
+        ctx.fillStyle = blobGrad
+        ctx.fill()
 
-        if (explodeProgress > 0) {
-          // Explosion! Vertices fly outward
-          const easeExplode = 1 - Math.pow(1 - explodeProgress, 3) // ease-out cubic
-          positions[i] = ox * displacement + velocities[i] * easeExplode
-          positions[i + 1] = oy * displacement + velocities[i + 1] * easeExplode
-          positions[i + 2] = oz * displacement + velocities[i + 2] * easeExplode
-        } else {
-          positions[i] = ox * displacement
-          positions[i + 1] = oy * displacement
-          positions[i + 2] = oz * displacement
+        // Orange rim light on blob edge
+        ctx.strokeStyle = `rgba(255, 106, 0, ${0.15 + prog * 0.25})`
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+
+        // Specular highlight
+        const specGrad = ctx.createRadialGradient(
+          cx - orbRadius * 0.25, cy - orbRadius * 0.3, 0,
+          cx - orbRadius * 0.1, cy - orbRadius * 0.15, orbRadius * 0.5
+        )
+        specGrad.addColorStop(0, `rgba(255, 255, 255, ${0.08 * blobAlpha})`)
+        specGrad.addColorStop(1, 'rgba(255, 255, 255, 0)')
+        ctx.fillStyle = specGrad
+        ctx.fill()
+
+        ctx.globalAlpha = 1
+        ctx.restore()
+
+        // Surface noise detail (subtle grain on the blob)
+        if (explodeProg < 0.3) {
+          ctx.save()
+          ctx.globalAlpha = 0.06 * (1 - explodeProg * 3)
+          ctx.globalCompositeOperation = 'lighter'
+          for (let i = 0; i < 40; i++) {
+            const a = blobAngles[i * 3 % BLOB_SEGMENTS]
+            const r2 = orbRadius * (0.3 + Math.random() * 0.6)
+            const px = cx + Math.cos(a + t * 0.1) * r2
+            const py = cy + Math.sin(a + t * 0.1) * r2
+            ctx.beginPath()
+            ctx.arc(px, py, Math.random() * 2 + 0.5, 0, Math.PI * 2)
+            ctx.fillStyle = '#FF6A00'
+            ctx.fill()
+          }
+          ctx.globalCompositeOperation = 'source-over'
+          ctx.globalAlpha = 1
+          ctx.restore()
         }
       }
-      sphereGeo.attributes.position.needsUpdate = true
-      sphereGeo.computeVertexNormals()
 
-      const scale = 0.6 + prog * 0.5
-      sphere.scale.setScalar(explodeProgress > 0 ? scale * (1 + explodeProgress * 0.5) : scale)
-      sphereMat.emissiveIntensity = 0.03 + prog * 0.2 + explodeProgress * 1.0
-      sphereMat.opacity = explodeProgress > 0 ? 0.8 * (1 - explodeProgress) : 1
+      // ── 4. Floating particles ──────────────────────────────────────────────
+      ctx.save()
+      for (const p of particles) {
+        p.angle += p.speed
+        const explodeRadius = isExplode ? p.vr * easeExplode * 200 : 0
+        const r = p.radius + explodeRadius
+        const px = cx + Math.cos(p.angle) * r
+        const py = cy + Math.sin(p.angle) * r * 0.6 // squish Y for pseudo-3D
 
-      sphere.rotation.y = t * 0.15
-      sphere.rotation.x = Math.sin(t * 0.1) * 0.2
-      wireShell.rotation.y = -t * 0.08
-      wireShell.rotation.z = t * 0.05
-      wireMat.opacity = explodeProgress > 0
-        ? (0.04 + prog * 0.12) * (1 - explodeProgress)
-        : 0.04 + prog * 0.12
-      ring.rotation.z = t * 0.2
-      ring2.rotation.z = -t * 0.15
-      ring2.rotation.x = Math.PI * 0.6 + Math.sin(t * 0.3) * 0.1
+        const alpha = p.opacity * (1 - explodeProg * 0.7)
+        if (alpha <= 0) continue
 
-      // Particles expand outward saat explode
-      if (explodeProgress > 0) {
-        const pPos = particleGeo.attributes.position.array as Float32Array
-        for (let i = 0; i < pPos.length; i += 3) {
-          pPos[i] *= 1 + explodeProgress * 0.03
-          pPos[i + 1] *= 1 + explodeProgress * 0.03
-          pPos[i + 2] *= 1 + explodeProgress * 0.03
-        }
-        particleGeo.attributes.position.needsUpdate = true
-        particleMat.opacity = 0.6 * (1 - explodeProgress * 0.8)
+        // Particle glow
+        ctx.beginPath()
+        ctx.arc(px, py, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 106, 0, ${alpha})`
+        ctx.shadowColor = '#FF6A00'
+        ctx.shadowBlur = 4
+        ctx.fill()
+        ctx.shadowBlur = 0
+      }
+      ctx.restore()
+
+      // ── 5. Explode flash ───────────────────────────────────────────────────
+      if (explodeProg > 0 && explodeProg < 0.4) {
+        const flashAlpha = (1 - explodeProg / 0.4) * 0.3
+        const flashGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbRadius * 2)
+        flashGrad.addColorStop(0, `rgba(255, 140, 40, ${flashAlpha})`)
+        flashGrad.addColorStop(0.5, `rgba(255, 80, 0, ${flashAlpha * 0.3})`)
+        flashGrad.addColorStop(1, 'rgba(255, 60, 0, 0)')
+        ctx.fillStyle = flashGrad
+        ctx.fillRect(0, 0, W, H)
       }
 
-      particles.rotation.y = t * 0.05
-      particles.rotation.x = Math.sin(t * 0.08) * 0.1
-      mainLight.position.x = 3 + Math.sin(t * 0.5) * 1
-      mainLight.position.y = 3 + Math.cos(t * 0.4) * 1
-      rimLight.position.x = -4 + Math.sin(t * 0.3) * 1.5
-
-      // Flash of light saat explode
-      if (explodeProgress > 0 && explodeProgress < 0.3) {
-        mainLight.intensity = 3 + (1 - explodeProgress / 0.3) * 10
+      // ── 6. Data stream lines (web3 aesthetic) ──────────────────────────────
+      ctx.save()
+      ctx.globalAlpha = 0.04 + prog * 0.03
+      ctx.strokeStyle = '#FF6A00'
+      ctx.lineWidth = 0.5
+      for (let i = 0; i < 6; i++) {
+        const yOffset = (t * 30 + i * 120) % H
+        ctx.beginPath()
+        ctx.setLineDash([2, 8 + Math.sin(t + i) * 4])
+        ctx.moveTo(0, yOffset)
+        ctx.lineTo(W, yOffset)
+        ctx.stroke()
       }
-
-      if (!envUpdated && t > 0.1) {
-        sphere.visible = false
-        cubeCamera.position.copy(sphere.position)
-        cubeCamera.update(renderer, scene)
-        sphere.visible = true
-        envUpdated = true
-      }
-
-      renderer.render(scene, camera)
+      ctx.setLineDash([])
+      ctx.globalAlpha = 1
+      ctx.restore()
     }
 
-    animate()
-
-    const onResize = () => {
-      if (!container) return
-      const w = container.clientWidth
-      const h = container.clientHeight
-      camera.aspect = w / h
-      camera.updateProjectionMatrix()
-      renderer.setSize(w, h)
-    }
-    window.addEventListener('resize', onResize)
+    animRef.current = requestAnimationFrame(draw)
 
     return () => {
       cancelAnimationFrame(animRef.current)
-      window.removeEventListener('resize', onResize)
-      sphereGeo.dispose(); sphereMat.dispose()
-      wireGeo.dispose(); wireMat.dispose()
-      ringGeo.dispose(); ringMat.dispose()
-      ring2Geo.dispose(); ring2Mat.dispose()
-      particleGeo.dispose(); particleMat.dispose()
-      cubeRenderTarget.dispose(); renderer.dispose()
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
+      window.removeEventListener('resize', resize)
     }
   }, [])
 
   useEffect(() => {
-    const cleanup = initScene()
+    const cleanup = initCanvas()
     return () => cleanup?.()
-  }, [initScene])
+  }, [initCanvas])
 
   const displayProgress = Math.floor(progress)
 
@@ -314,8 +396,12 @@ const LoadingScreen = ({ onFinished }: { onFinished?: () => void }) => {
             }}
           />
 
-          {/* Three.js canvas */}
-          <div ref={mountRef} className="absolute inset-0 z-0" />
+          {/* Canvas 2D — replaces Three.js */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full z-0"
+            style={{ display: 'block' }}
+          />
 
           {/* HUD overlay */}
           <div className="relative z-30 flex flex-col items-center pointer-events-none select-none">

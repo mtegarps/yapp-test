@@ -21,9 +21,9 @@ export default function HeroShaderCanvas({ className = '' }: { className?: strin
     const height = container.clientHeight
     if (width === 0 || height === 0) return
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'low-power' })
     renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     container.appendChild(renderer.domElement)
     renderer.domElement.style.display = 'block'
 

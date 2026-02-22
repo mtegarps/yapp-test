@@ -38,7 +38,7 @@ export default function BackgroundParticles() {
     resize()
 
     // Spawn particles
-    const count = Math.min(80, Math.floor(window.innerWidth / 20))
+    const count = Math.min(50, Math.floor(window.innerWidth / 30))
     particlesRef.current = Array.from({ length: count }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,

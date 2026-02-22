@@ -231,7 +231,7 @@ function SectionBackground() {
       </div>
       <div className="absolute inset-0 flex items-center pointer-events-none z-[1]">
         <Marquee baseVelocity={0.4} gap="30px">
-          {createArray(10).map(i => (
+          {createArray(4).map(i => (
             <span
               key={i}
               className="text-[80px] md:text-[120px] lg:text-[160px] font-black uppercase text-foreground/[0.04] whitespace-nowrap select-none tracking-[0.15em]"
