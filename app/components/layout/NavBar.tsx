@@ -24,7 +24,7 @@ export default function NavBar() {
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const diff = latest - lastScrollY.current
     // Hide kalo scroll down > 10px, show kalo scroll up
-    if (diff > 10 && latest > 100) setHidden(true)
+    // if (diff > 10 && latest > 100) setHidden(true)
     if (diff < -5) setHidden(false)
     setHasScrolled(latest > 50)
     lastScrollY.current = latest
@@ -79,10 +79,11 @@ export default function NavBar() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
+          className="flex items-center"
         >
           <Link
             href=""
-            className="hidden md:block relative overflow-hidden bg-primary text-white px-2 py-2.5 text-xs font-semibold group"
+            className="relative overflow-hidden bg-primary text-white px-2 py-2.5 text-xs font-semibold group"
           >
             {/* Sweep effect on hover */}
             <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-out" />

@@ -18,7 +18,7 @@ interface AnimatedLineProps {
  */
 function AnimatedLine({ text, align, progress }: AnimatedLineProps) {
   const words = text.split(' ')
-  const maxPadding = '40%'
+  const maxPadding = '30%'
 
   const pLeft = useTransform(
     progress,
@@ -39,7 +39,7 @@ function AnimatedLine({ text, align, progress }: AnimatedLineProps) {
       {words.map((word, i) => (
         <RandomizedTextEffect
           key={i}
-          className="text-[22px] md:text-[32px] lg:text-7xl tracking-tight font-semibold"
+          className="text-[32px] lg:text-7xl tracking-tight font-semibold"
           duration={800}
           revealSpeed={40}
         >
@@ -60,14 +60,14 @@ export default function ExpandingTextSection() {
   return (
     <section className="relative z-20 bg-bg-surface2">
       <div ref={containerRef} className="h-[200vh] md:h-[300vh] relative">
-        <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center bg-bg-surface2 z-20 pt-[100px] md:pt-[130px]">
+        <div className="sticky top-0 h-screen flex flex-col justify-center bg-bg-surface2 z-20 pt-[100px] md:pt-[130px] relative overflow-hidden">
           <Image
             src="/star_left_decor.svg"
             alt="Star Decor"
             width={200}
             height={200}
             loading="lazy"
-            className="absolute bottom-0 left-0 hidden md:block w-[120px] lg:w-[200px] h-auto"
+            className="absolute bottom-0 left-0 w-[80px] md:w-[120px] lg:w-[200px] h-auto opacity-60"
           />
           <Image
             src="/star_right_decor.svg"
@@ -75,7 +75,7 @@ export default function ExpandingTextSection() {
             width={200}
             height={200}
             loading="lazy"
-            className="absolute top-0 right-0 hidden md:block w-[120px] lg:w-[200px] h-auto"
+            className="absolute top-[60px] right-0 w-[80px] md:w-[120px] lg:w-[200px] h-auto opacity-60"
           />
 
           <div className="grid grid-rows-4 grid-cols-1 gap-3 md:gap-6 w-full px-4 md:px-12">

@@ -28,3 +28,16 @@ export interface RaffleItem {
     seconds: number
   }
 }
+
+// NFT data type
+export interface NFTData {
+  id: number
+  name: string
+  image: string
+  price: number
+  rafflePrice: number
+  quota: number
+  sold: number
+  type: 'NFT' | 'Token'
+  saleEnd: string
+}

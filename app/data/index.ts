@@ -1,4 +1,4 @@
-import { Product, CardData, RaffleItem } from '@/app/types'
+import { Product, CardData, RaffleItem, NFTData } from '@/app/types'
 
 // Produk dummy buat hero section dan marquee
 export const PRODUCTS: Product[] = [
@@ -55,7 +55,120 @@ export const CARD_POSITIONS = {
   ],
 }
 
-// Dummy raffle items buat carousel section
+export const nftDataDummy: NFTData[] = [
+  {
+    id: 1,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 2,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 3,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 4,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 5,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 6,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 7,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 8,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 9,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+  {
+    id: 10,
+    name: "Pudgy Penguin",
+    image: "/nfts/nft-1.png",
+    price: 200000,
+    rafflePrice: 10,
+    quota: 50,
+    sold: 3,
+    type: 'NFT',
+    saleEnd: "2026-02-28"
+  },
+]
+
+// Dummy raffle items buat carousel section (legacy, kept for compatibility)
 export const DUMMY_RAFFLES: RaffleItem[] = Array.from({ length: 8 }).map((_, i) => ({
   id: String(i + 1),
   image: '/products/pudgy.svg',

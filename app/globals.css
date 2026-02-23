@@ -22,6 +22,12 @@
   --foreground-muted: #878787;
   --foreground-subtle: #666666;
   
+  /* Raflux-matching colors */
+  --muted: #353333;
+  --muted-2: #A1A1A1;
+  --placeholder: #484848;
+  --base-2: #2c2c2c;
+  
   /* Accent colors */
   --accent-blue: #3B82F6;
   --accent-purple: #A855F7;
@@ -50,6 +56,11 @@
   --color-foreground: var(--foreground);
   --color-foreground-muted: var(--foreground-muted);
   --color-foreground-subtle: var(--foreground-subtle);
+  
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-placeholder: var(--placeholder);
+  --color-base-2: var(--base-2);
   
   --color-accent-blue: var(--accent-blue);
   --color-accent-purple: var(--accent-purple);
@@ -153,6 +164,24 @@
   .animate-draw-line {
     animation: draw-line 1s ease-out forwards;
     transform-origin: top;
+  }
+
+  /* 3D card utilities (raflux HowItWorkSection) */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
   }
 }
 

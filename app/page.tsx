@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 // Layout - lightweight, load immediately
-import { NavBar, Taglines } from '@/app/components/layout'
+import { NavBar } from '@/app/components/layout'
 
 // Cards - lightweight, load immediately
 import { ProductAltCard, ProductGrid } from '@/app/components/cards'
@@ -47,18 +47,8 @@ const CardSwipeSection = dynamic(
   { ssr: false }
 )
 
-const DontMissOutSection = dynamic(
+const ShowcaseSection = dynamic(
   () => import('@/app/components/sections/DontMissOutSection'),
-  { ssr: false }
-)
-
-const RaffleCarousel = dynamic(
-  () => import('@/app/components/sections/RaffleCarousel'),
-  { ssr: false }
-)
-
-const DarkSpacer = dynamic(
-  () => import('@/app/components/sections/DarkSpacer'),
   { ssr: false }
 )
 
@@ -190,27 +180,17 @@ export default function Home() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
-                className="w-full h-svh flex flex-col md:flex-row justify-between"
+                className="w-full h-[160px] md:h-[calc(100vh-560px)] md:min-h-[160px] flex flex-row justify-between"
               >
-                <div className="flex-1 md:flex-2/5 flex justify-end items-start pt-4 md:pt-[25.6px] pr-4 md:pr-[37px] border-l border-r border-b border-border">
-                  <CharacterFadeEffect
-                    tag="p"
-                    className="text-sm font-medium text-end text-foreground-muted"
-                    staggerDelay={0.03}
-                    baseDelay={0.5}
-                  >
-                    Try Your Luck Today
-                  </CharacterFadeEffect>
+                <div className="w-2/5 md:flex-2/5 flex justify-end items-end pb-4 md:pb-[25.6px] pr-3 md:pr-[37px] border-l border-r border-b border-border">
+                  <p className="text-[10px] md:text-sm font-medium text-right text-foreground-muted uppercase leading-tight">
+                    TRY YOUR LUCK<br />TODAY
+                  </p>
                 </div>
-                <div className="flex-1 md:flex-3/5 w-full pt-4 md:pt-[29px] pr-4 md:pr-14 border-r border-b border-border">
-                  <CharacterFadeEffect
-                    tag="h2"
-                    className="text-xl md:text-2xl lg:text-5xl font-semibold tracking-tight text-end uppercase ml-4 md:ml-[47px] lg:ml-[141px]"
-                    staggerDelay={0.03}
-                    baseDelay={0.5}
-                  >
-                    STARTING AS LOW AS $10!
-                  </CharacterFadeEffect>
+                <div className="w-3/5 md:flex-3/5 px-3 md:pr-14 border-r border-b border-border flex items-center justify-end">
+                  <h2 className="text-xl md:text-2xl lg:text-5xl font-semibold tracking-tight text-end uppercase leading-tight">
+                    STARTING AS<br />LOW AS $10!
+                  </h2>
                 </div>
               </motion.div>
             </section>
@@ -327,14 +307,9 @@ export default function Home() {
 
             <CardSwipeSection />
 
-            <DontMissOutSection />
-
-            <RaffleCarousel />
-            <DarkSpacer />
+            <ShowcaseSection />
 
             <FooterSection />
-
-            <Taglines />
           </section>
         </>
       )}
