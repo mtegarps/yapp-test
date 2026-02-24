@@ -41,12 +41,11 @@ const RandomizedTextEffect: React.FC<RandomizedTextEffectProps> = ({
   }
 
   const text = textProp || extractText(children)
-  const [displayedText, setDisplayedText] = useState('')
+  const [displayedText, setDisplayedText] = useState(text)
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.5 })
 
   const scramble = useCallback(() => {
-    // Pake karakter dari text aslinya biar width-nya konsisten
     const charPool =
       randomChars ||
       Array.from(new Set(text.split('')))
@@ -55,6 +54,17 @@ const RandomizedTextEffect: React.FC<RandomizedTextEffectProps> = ({
       'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
     let iteration = 0
+
+    // Start immediately with fully scrambled text
+    setDisplayedText(
+      text
+        .split('')
+        .map(letter => {
+          if (letter === ' ') return ' '
+          return charPool[Math.floor(Math.random() * charPool.length)]
+        })
+        .join('')
+    )
 
     const interval = setInterval(() => {
       const newText = text

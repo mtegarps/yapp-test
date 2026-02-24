@@ -290,7 +290,7 @@ export default function Home() {
 
             <section className="bg-bg h-[280px] flex items-center justify-center border-b border-border [--gap:50px] md:[--gap:200px] lg:[--gap:200px] xl:[--gap:200px]">
               <div className="w-full transform-none">
-                <Marquee baseVelocity={0.5} gap="var(--gap)" className="group flex overflow-hidden flex-row p-0">
+                <Marquee baseVelocity={3} gap="var(--gap)" className="group flex overflow-hidden flex-row p-0">
                   {createArray(8).map(index => (
                     <div key={index} className="lg:max-w-[695px] max-w-[380px] w-full max-lg:space-y-4 h-fit relative">
                       <p className="lg:absolute top-4 right-4 lg:max-w-[143px] text-foreground-muted lg:text-right text-sm">

@@ -59,26 +59,26 @@ export default function ExpandingTextSection() {
 
   return (
     <section className="relative z-20 bg-bg-surface2">
-      <div ref={containerRef} className="h-[200vh] md:h-[300vh] relative">
-        <div className="sticky top-0 h-screen flex flex-col justify-center bg-bg-surface2 z-20 pt-[100px] md:pt-[130px] relative overflow-hidden">
+      <div ref={containerRef} className="h-[350vh] md:h-[450vh] relative">
+        <div className="sticky top-0 h-screen flex flex-col justify-center bg-bg-surface2 z-20 pt-[120px] md:pt-[160px] relative">
           <Image
             src="/star_left_decor.svg"
             alt="Star Decor"
             width={200}
             height={200}
             loading="lazy"
-            className="absolute bottom-0 left-0 w-[80px] md:w-[120px] lg:w-[200px] h-auto opacity-60"
+            className="absolute bottom-4 left-0 w-[140px] md:w-[140px] lg:w-[200px] h-auto opacity-60 pointer-events-none"
           />
           <Image
             src="/star_right_decor.svg"
             alt="Star Decor"
             width={200}
-            height={200}
+            height={500}
             loading="lazy"
-            className="absolute top-[60px] right-0 w-[80px] md:w-[120px] lg:w-[200px] h-auto opacity-60"
+            className="absolute top-[140px] right-0 w-[140px] md:w-[140px] lg:w-[200px] h-auto opacity-60 pointer-events-none"
           />
 
-          <div className="grid grid-rows-4 grid-cols-1 gap-3 md:gap-6 w-full px-4 md:px-12">
+          <div className="grid grid-rows-4 grid-cols-1 gap-3 md:gap-6 w-full px-4 md:px-12 overflow-hidden">
             <AnimatedLine text="EMPOWER COMMUNITIES" align="start" progress={scrollYProgress} />
             <AnimatedLine text="A FAIR CHANCE" align="end" progress={scrollYProgress} />
             <AnimatedLine text="TO WIN, OWN, AND" align="start" progress={scrollYProgress} />

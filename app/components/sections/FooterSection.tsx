@@ -81,7 +81,7 @@ const RafluxMarquee = () => {
 const FooterSection = () => {
   return (
     <footer className="w-full" style={{ backgroundColor: '#171616' }}>
-      <div className="lg:grid-cols-8 lg:grid" style={{ borderBottom: '1px solid #484848', minHeight: 'calc(100vh - 42px)' }}>
+      <div className="lg:grid-cols-8 lg:grid lg:min-h-[calc(100vh-42px)]" style={{ borderBottom: '1px solid #484848' }}>
         <div className="hidden lg:block" style={{ borderRight: '1px solid #484848' }} />
 
         <div className="col-span-6 flex flex-col justify-end" style={{ borderRight: '1px solid #484848' }}>
